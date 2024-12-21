@@ -6,6 +6,7 @@ public class Menu {
         this.scanner = new Scanner(System.in);
     }
     protected void run(){
+        StatisticFile file = new StatisticFile();
         while (true) {
             System.out.println("\nMenu:");
             System.out.println("1. Passenger Statistic");

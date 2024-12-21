@@ -1,24 +1,29 @@
-import java.io.BufferedReader;
-import java.io.FileNotFoundException;
-import java.io.FileReader;
-import java.io.IOException;
+import java.io.*;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
-import java.util.ArrayList;
 import java.util.List;
 
-public class FlightFile extends statisticFile{
-   private final String fileName = "Flight.csv";
-   private List<Flight> flightList;
-   public FlightFile(){
-       this.flightList = new ArrayList<>();
-        loadInfofromFile();
-   }
+public class FlightFile {
+   private final String fileFlight = "Flight.csv";
 
-    @Override
-    protected void loadInfofromFile() {
-        super.checkExistFile(fileName);
-        try (BufferedReader reader = new BufferedReader(new FileReader(fileName))) {
+    protected void checkExistFile(String fileName){
+        File file = new File(fileName);
+        if (!file.exists()) {
+            System.out.println("File does not exist. Creating a new file.");
+            try {
+                if (file.createNewFile()) {
+                    System.out.println("File created.");
+                } else {
+                    System.out.println("Failed to create file.");
+                }
+            } catch (IOException e) {
+                System.out.println("Error creating file: " + e.getMessage());
+            }
+        }
+
+    protected void loadFlightfromFile(List<Flight>flightList) {
+        checkExistFile(fileFlight);
+        try (BufferedReader reader = new BufferedReader(new FileReader(fileFlight))) {
             String line;
             while ((line = reader.readLine()) != null) {
                 String[] data = line.split(",");
@@ -47,9 +52,5 @@ public class FlightFile extends statisticFile{
         } catch (IOException e) {
             System.out.println("Error reading file: " + e.getMessage());
         }
-    }
-
-    public List<Flight> getFlightList() {
-        return flightList;
     }
 }
