@@ -11,9 +11,9 @@ public class statisticManagement {
     private List<Member> memberList;
     private List<Passenger>passengerList;
 
-    public statisticManagement(StatisticFile file) {
+    public statisticManagement(StatisticFile file, Scanner scanner) {
         this.statisticFile = file;
-        this.scanner = new Scanner(System.in);
+        this.scanner = scanner;
         this.flightList = new ArrayList<>();
         this.memberList = new ArrayList<>();
         this.passengerList = new ArrayList<>();
@@ -23,34 +23,31 @@ public class statisticManagement {
     }
 
     public void printPassengerStatistics() {
-        int under18 = 0;
-        int age18to30 = 0;
-        int age30to40 = 0;
-        int age40to60 = 0;
-        int over60 = 0;
-        if (passengerList.isEmpty()) {
-            System.out.println("No passenger available");
+        int[] ageGroups = new int[5];
+        if (passengerList == null || passengerList.isEmpty()) {
+            System.out.println("No passengers available.");
             return;
         }
         for (Passenger passenger : passengerList) {
             int age = passenger.getAge();
             if (age < 18)
-                under18++;
+                ageGroups[0]++;
             else if (age <= 30)
-                age18to30++;
+                ageGroups[1]++;
             else if (age <= 40)
-                age30to40++;
+                ageGroups[2]++;
             else if (age <= 60)
-                age40to60++;
+                ageGroups[3]++;
             else
-                over60++;
+                ageGroups[4]++;
         }
-        System.out.println("Number of passengers under 18 years old: " + under18);
-        System.out.println("Number of passengers from 18 to 30 years old: " + age18to30);
-        System.out.println("Number of passengers from 30 to 40 years old: " + age30to40);
-        System.out.println("Number of passengers from 40 to 60 years old: " + age40to60);
-        System.out.println("Number of passengers over 60 years old: " + over60);
+
+        String[] ageGroup = {"under 18 years old: ", "from 18 to 30 years old: ","from 30 to 40 years old: ", "from 40 to 60 years old: ", "over 60 years old: "};
+        for(int i = 0; i < ageGroup.length; i++) {
+            System.out.println("Number of passengers "+ ageGroup[i] + ageGroups[i]);
+        }
     }
+
 
     public void printMemberStatistic() {
         int[] roleCounts = new int[7];
@@ -78,21 +75,16 @@ public class statisticManagement {
             }
         }
         System.out.println("IT Team (Developer/Tester): " + roleCounts[0]);
-        System.out.println("Pilot: " + roleCounts[1]);
-        System.out.println("Flight Attendant: " + roleCounts[2]);
-        System.out.println("Designer: " + roleCounts[3]);
-        System.out.println("Analyst: " + roleCounts[4]);
-        System.out.println("Manager: " + roleCounts[5]);
-        System.out.println("Other Roles: " + roleCounts[6]);
+        for (int i = 2; i < roles.length; i++) {
+            System.out.println(roles[i] + ": " + roleCounts[i-1]);
+        }
     }
 
     public void printFlightStatistic() {
         int flightDepart = 0;
         int flightArrive = 0;
-        System.out.print("Enter the year: ");
-        int year = scanner.nextInt();
-        System.out.print("Enter the month (1-12): ");
-        int month = scanner.nextInt();
+        int year = readInput("Enter the year: ");
+        int month = readInput("Enter the month (1-12): ");
         if (month < 1 || month > 12)
             System.out.println("Invalid month. Please enter a month between 1 and 12");
         else {
@@ -109,5 +101,9 @@ public class statisticManagement {
         }
         System.out.println("Number of Flight arrived to HCM city in " + Month.of(month) + "/" + year + ": " + flightDepart);
         System.out.println("Number of Flight depart from HCM city in " + Month.of(month) + "/" + year + ": " + flightArrive);
+    }
+    private int readInput(String prompt) {
+        System.out.print(prompt);
+        return scanner.nextInt();
     }
 }
