@@ -1,74 +1,15 @@
 import java.io.*;
-import java.util.*;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
+import java.util.List;
 
-public class File {
-    private static final String AIRCREW_FILE = "aircrew.csv";
-    private static final String EMPLOYEES_FILE = "employee_data.csv";
+public class StatisticFile {
+   private final String fileFlight = "Flight.csv";
+    private static final String fileMember = "employee_data.csv";
+    private static final String filePassenger = "passenger.csv";
 
-    public void loadAircrewFromFile(Map<String, AircrewTeam> aircrewMap, Map<String, AircrewMember> membersMap) {
-        checkFileExist(AIRCREW_FILE);
-        try (BufferedReader reader = new BufferedReader(new FileReader(AIRCREW_FILE))) {
-            String line;
-            while ((line = reader.readLine()) != null) {
-                String[] parts = line.split(",");
-                if (parts.length >= 3) {
-                    String teamId = parts[0].trim();
-                    String teamName = parts[1].trim();
-                    AircrewTeam team = new AircrewTeam(teamId, teamName);
-                    aircrewMap.put(teamId, team);
-
-                    for (int i = 2; i < parts.length; i++) {
-                        String memberName = parts[i].trim();
-                        String role = (i == 2) ? "Pilot" : "Flight Attendant";
-                        AircrewMember member = new AircrewMember("", memberName, "", 0, role);
-                        membersMap.put(member.getId(), member);
-                    }
-                }
-            }
-        } catch (IOException e) {
-            System.out.println("Error reading aircrew file: " + e.getMessage());
-        }
-    }
-
-    public void loadEmployeesFromFile(List<AircrewMember> pilots, List<AircrewMember> attendants) {
-        checkFileExist(EMPLOYEES_FILE);
-        try (BufferedReader reader = new BufferedReader(new FileReader(EMPLOYEES_FILE))) {
-            String line;
-            while ((line = reader.readLine()) != null) {
-                String[] data = line.split(",");
-                if (data.length >= 5) {
-                    String id = data[0].trim();
-                    String name = data[1].trim();
-                    String gender = data[2].trim();
-                    String role = data[3].trim();
-                    int age = Integer.parseInt(data[4].trim());
-                    AircrewMember member = new AircrewMember(id, name, gender, age, role);
-                    if (role.equalsIgnoreCase("Pilot")) {
-                        pilots.add(member);
-                    } else if (role.equalsIgnoreCase("Flight Attendant")) {
-                        attendants.add(member);
-                    }
-                }
-            }
-        } catch (IOException e) {
-            System.out.println("Error reading file: " + e.getMessage());
-        }
-    }
-
-    public void saveAircrewToFile(Map<String, AircrewTeam> aircrewMap) {
-        checkFileExist(AIRCREW_FILE);
-        try (BufferedWriter writer = new BufferedWriter(new FileWriter(AIRCREW_FILE))) {
-            for (AircrewTeam team : aircrewMap.values()) {
-                writer.write(team.toCsvString());
-                writer.newLine();
-            }
-        } catch (IOException e) {
-            System.out.println("Error writing to file: " + e.getMessage());
-        }
-    }
-
-    private void checkFileExist(String fileName) {
-        java.io.File file = new java.io.File(fileName);
+    protected void checkExistFile(String fileName) {
+        File file = new File(fileName);
         if (!file.exists()) {
             System.out.println("File does not exist. Creating a new file.");
             try {
@@ -80,6 +21,85 @@ public class File {
             } catch (IOException e) {
                 System.out.println("Error creating file: " + e.getMessage());
             }
+        }
+    }
+
+    protected void loadFlightfromFile(List<Flight> flightList) {
+        checkExistFile(fileFlight);
+        try (BufferedReader reader = new BufferedReader(new FileReader(fileFlight))) {
+            String line;
+            while ((line = reader.readLine()) != null) {
+                String[] data = line.split(",");
+                if (data.length == 7) {
+                    try {
+                        String code = data[0].trim();
+                        String airlineName = data[1].trim();
+                        String departLocation = data[2].trim();
+                        String arriveLocation = data[3].trim();
+                        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm");
+                        LocalDateTime departTime = LocalDateTime.parse(data[4].trim(), formatter);
+                        LocalDateTime arriveTime = LocalDateTime.parse(data[5].trim(), formatter);
+
+                        int seat = Integer.parseInt(data[6].trim());
+                        Flight flight = new Flight(code, airlineName, departLocation, arriveLocation, departTime, arriveTime, seat);
+                        flightList.add(flight);
+                    } catch (Exception e) {
+                        System.out.println("Error parsing flight data: " + e.getMessage() + " in line: " + line);
+                    }
+                } else {
+                    System.out.println("Skipping invalid line: " + line);
+                }
+            }
+        } catch (FileNotFoundException e) {
+            System.out.println("Error loading file: " + e.getMessage());
+        } catch (IOException e) {
+            System.out.println("Error reading file: " + e.getMessage());
+        }
+    }
+    protected void loadMemberfromFile(List<Member> memberlist) {
+        checkExistFile(fileMember);
+        try (BufferedReader reader = new BufferedReader(new FileReader(fileMember))) {
+            String line;
+            while ((line = reader.readLine()) != null) {
+                String[] data = line.split(",");
+                if (data.length >= 5) {
+                    String id = data[0].trim();
+                    String name = data[1].trim();
+                    String gender = data[2].trim();
+                    String role = data[3].trim();
+                    int age = Integer.parseInt(data[4].trim());
+                    Member member = new Member(id, name, gender, age, role);
+                    memberlist.add(member);
+                }
+            }
+        } catch (FileNotFoundException e){
+            System.out.println("Error loading file: " + e.getMessage());
+        } catch (IOException e){
+            e.printStackTrace();
+        }
+    }
+    protected void loadPassengerfromFile(List<Passenger>passengers) {
+        checkExistFile(filePassenger);
+        try (BufferedReader reader = new BufferedReader(new FileReader(filePassenger))) {
+            String line;
+            while ((line = reader.readLine()) != null) {
+                String[] parts = line.split(",");
+                if (parts.length == 5) {
+                    String id = parts[0].trim();
+                    String name = parts[1].trim();
+                    int age = Integer.parseInt(parts[2].trim());
+                    String gender = parts[3].trim();
+                    String phone = parts[4].trim();
+                    Passenger passenger = new Passenger(id, name, age, gender, phone);
+                    passengers.add(passenger);
+                }
+            }
+        }
+        catch (IOException e){
+            System.out.println("Error reading file: " + e.getMessage());
+        }
+        catch (NumberFormatException e){
+            System.out.println("Error parsing age: " + e.getMessage());
         }
     }
 }
