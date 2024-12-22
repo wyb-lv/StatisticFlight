@@ -1,18 +1,25 @@
 import java.time.LocalDateTime;
 import java.time.Month;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Scanner;
 
 public class statisticManagement {
-    private PassengerFile passengerFile;
-    private MemberFile memberFile;
-    private FlightFile flightFile;
+    private StatisticFile statisticFile;
     private Scanner scanner;
+    private List<Flight> flightList;
+    private List<Member> memberList;
+    private List<Passenger>passengerList;
 
-    public statisticManagement() {
-        this.passengerFile = new PassengerFile();
-        this.memberFile = new MemberFile();
-        this.flightFile = new FlightFile();
+    public statisticManagement(StatisticFile file) {
+        this.statisticFile = file;
         this.scanner = new Scanner(System.in);
+        this.flightList = new ArrayList<>();
+        this.memberList = new ArrayList<>();
+        this.passengerList = new ArrayList<>();
+        statisticFile.loadFlightfromFile(flightList);
+        statisticFile.loadMemberfromFile(memberList);
+        statisticFile.loadPassengerfromFile(passengerList);
     }
 
     public void printPassengerStatistics() {
@@ -21,11 +28,11 @@ public class statisticManagement {
         int age30to40 = 0;
         int age40to60 = 0;
         int over60 = 0;
-        if (passengerFile.getPassengers().isEmpty()) {
+        if (passengerList.isEmpty()) {
             System.out.println("No passenger available");
             return;
         }
-        for (Passenger passenger : passengerFile.getPassengers()) {
+        for (Passenger passenger : passengerList) {
             int age = passenger.getAge();
             if (age < 18)
                 under18++;
@@ -48,11 +55,11 @@ public class statisticManagement {
     public void printMemberStatistic() {
         int[] roleCounts = new int[7];
         String[] roles = {"Developer", "Tester", "Pilot", "Flight Attendant", "Designer", "Analyst", "Manager"};
-        if (memberFile.getMemberList().isEmpty()) {
+        if (memberList.isEmpty()) {
             System.out.println("File is empty");
             return;
         }
-        for (Member member : memberFile.getMemberList()) {
+        for (Member member : memberList) {
             String role = member.getRole();
             if (role.equalsIgnoreCase(roles[0]) || role.equalsIgnoreCase(roles[1])) {
                 roleCounts[0]++;
@@ -89,7 +96,7 @@ public class statisticManagement {
         if (month < 1 || month > 12)
             System.out.println("Invalid month. Please enter a month between 1 and 12");
         else {
-            for (Flight flight : flightFile.getFlightList()) {
+            for (Flight flight : flightList) {
                 LocalDateTime departTime = flight.getDepartureTime();
                 LocalDateTime arriveTime = flight.getArrivalTime();
                 String departLocation = flight.getDepartureLocation();
